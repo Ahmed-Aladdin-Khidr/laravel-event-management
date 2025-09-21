@@ -8,7 +8,6 @@ use App\Models\Event;
 use App\Http\Resources\AttendeeResource;
 use App\Models\Attendee;
 use App\Http\Traits\CanLoadRelationships;
-use Illuminate\Support\Facades\Gate;
 
 class AttendeeController extends Controller
 {
@@ -22,7 +21,6 @@ class AttendeeController extends Controller
      */
     public function index(Event $event)
     {
-        Gate::authorize('viewAny', $event);
         $attendees = $this->loadRelations(
             $event->attendees()->latest()
         );
@@ -37,9 +35,8 @@ class AttendeeController extends Controller
      */
     public function store(Request $request, Event $event)
     {
-        Gate::authorize('create', $event);
         $attendee = $event->attendees()->create([
-            'user_id' => 1,
+            'user_id' => $request->user()->id,
         ]);
 
         return new AttendeeResource($this->loadRelations($attendee));
@@ -50,7 +47,6 @@ class AttendeeController extends Controller
      */
     public function show(Event $event, Attendee $attendee)
     {
-        Gate::authorize('view', $attendee);
         return new AttendeeResource($this->loadRelations($attendee));
     }
 
@@ -59,7 +55,6 @@ class AttendeeController extends Controller
      */
     public function destroy(Event $event, Attendee $attendee)
     {
-        Gate::authorize('delete', $attendee);
         $attendee->delete();
 
         return response()->noContent();

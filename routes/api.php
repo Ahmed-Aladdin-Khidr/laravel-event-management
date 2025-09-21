@@ -13,24 +13,30 @@ Route::post('login', [\App\Http\Controllers\Api\AuthController::class, 'login'])
 Route::post('logout', [\App\Http\Controllers\Api\AuthController::class, 'singOut'])
     ->middleware('auth:sanctum');
 
-// Public routes
+// Public routes (no authorization needed)
 Route::apiResource('events', EventController::class)
     ->only(['index', 'show']);
 
-// Protected routes
+// Protected routes with authorization middleware
 Route::apiResource('events', EventController::class)
     ->only(['store', 'update', 'destroy'])
     ->middleware(['auth:sanctum', 'throttle:api']);
 
-// Protected routes
-Route::apiResource('events.attendees', AttendeeController::class)
-    ->scoped()
-    ->only(['store', 'destroy'])
-    ->middleware(['auth:sanctum', 'throttle:api']);
+// Event-specific authorization middleware
+Route::put('events/{event}', [EventController::class, 'update'])
+    ->middleware(['auth:sanctum', 'can:update,event']);
 
+Route::delete('events/{event}', [EventController::class, 'destroy'])
+    ->middleware(['auth:sanctum', 'can:delete,event']);
 
-// Public routes
+// Attendee routes with authorization
 Route::apiResource('events.attendees', AttendeeController::class)
     ->scoped()
     ->only(['index', 'show']);
+
+Route::post('events/{event}/attendees', [AttendeeController::class, 'store'])
+    ->middleware(['auth:sanctum', 'can:create,App\Models\Attendee']);
+
+Route::delete('events/{event}/attendees/{attendee}', [AttendeeController::class, 'destroy'])
+    ->middleware(['auth:sanctum', 'can:delete,attendee']);
 
