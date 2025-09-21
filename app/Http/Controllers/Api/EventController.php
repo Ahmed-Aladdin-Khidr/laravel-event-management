@@ -22,7 +22,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        // Policy will be called automatically by Laravel
+        Gate::authorize('viewAny', Event::class);
         $query = $this->loadRelations(Event::query());
 
         return EventResource::collection(
@@ -35,7 +35,7 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        // Gate::authorize('create', Event::class);
+        Gate::authorize('create', Event::class);
         $event = Event::create([
             ...$request->validate([
                 'name' => 'required|string|max:255',
@@ -53,7 +53,7 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        // Gate::authorize('view', $event);
+        Gate::authorize('view', $event);
         $event = $this->loadRelations($event);
         return new EventResource($event);
     }
@@ -63,7 +63,7 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
-        // Gate::authorize('update-event', $event);
+        Gate::authorize('update-event', $event);
         // if (Gate::denies('update-event', $event)) {
         //     abort(403, 'You are not allowed to update this event');
         // }
@@ -83,7 +83,7 @@ class EventController extends Controller
      */
     public function destroy(Event $event)
     {
-        // Gate::authorize('delete', $event);
+        Gate::authorize('delete', $event);
         // Gate::authorize('update-event', $event);
         // if (Gate::denies('update-event', $event)) {
         //     abort(403, 'You are not allowed to delete this event');
